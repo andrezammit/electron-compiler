@@ -12,5 +12,9 @@
   },
   "author": "André Zammit",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/andrezammit/recipe-manager-build#readme"
+  "homepage": "https://bitbucket.org/andrezammit/recipe-manager-build#readme",
+  "dependencies": {
+    "electron-packager": "^8.3.0",
+    "uglify-js": "^2.7.4"
+  }
 }

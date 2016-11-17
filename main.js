@@ -1,4 +1,7 @@
+var fs = require("fs");
+
 var packager = require("electron-packager");
+var uglifyJS = require("uglify-js");
 
 var options =
     {
