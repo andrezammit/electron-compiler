@@ -1,0 +1,16 @@
+{
+  "name": "recipe_manager_build",
+  "version": "1.0.0",
+  "description": "Builder for Recipe Manager project.",
+  "main": "main.js",
+  "scripts": {
+    "start": "node ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://andrezammit@bitbucket.org/andrezammit/recipe-manager-build.git"
+  },
+  "author": "André Zammit",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/andrezammit/recipe-manager-build#readme"
+}
