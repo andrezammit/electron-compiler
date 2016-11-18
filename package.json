@@ -15,6 +15,7 @@
   "homepage": "https://bitbucket.org/andrezammit/recipe-manager-build#readme",
   "dependencies": {
     "electron-packager": "^8.3.0",
+    "fs-extra": "^1.0.0",
     "uglify-js": "^2.7.4"
   }
 }
