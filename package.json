@@ -16,6 +16,7 @@
   "dependencies": {
     "electron-packager": "^8.3.0",
     "fs-extra": "^1.0.0",
+    "remove-empty-directories": "0.0.1",
     "uglify-js": "^2.7.4"
   }
 }

@@ -1,83 +1,166 @@
 var path = require("path");
 var fs = require("fs-extra");
+var child_process = require('child_process');
 
-var packager = require("electron-packager");
 var uglifyJS = require("uglify-js");
+var packager = require("electron-packager");
+var removeEmptyDirs = require('remove-empty-directories');
 
-var repoDir = "..\\Recipe Manager\\";
-var ignoreList =
-    [
-        "node_modules",
-        ".git",
-        ".data",
-        ".gitignore",
-        ".jshintrc",
-        ".vscode",
-        ".credentials",
-        "icons",
-        "typings",
-        "jsconfig.json",
-    ];
+var appDir = "./app/";
+var releasesDir = "./releases";
+var repoDir = "../Recipe Manager/";
 
-function enumFolder(dirPath, filesFound)
+var ignoreList = IgnoreList();
+
+function IgnoreList()
 {
-    var dirItems = fs.readdirSync(dirPath);
+    var list =
+        [
+            "node_modules/",
+            ".git/",
+            ".data/",
+            ".gitignore",
+            ".jshintrc",
+            ".vscode/",
+            ".credentials/",
+            "icons/",
+            "typings/",
+            "typings.json",
+            "jsconfig.json",
+        ];
 
-    dirItems.forEach(
-        function (item)
+    function search(searchItem)
+    {
+        for (var cnt = 0; cnt < list.length; cnt++)
         {
-            var filePath = path.join(dirPath, item);
+            var item = list[cnt];
 
-            if (ignoreList.indexOf(item) > -1)
-                return;
+            if (item === searchItem)
+                return cnt;
 
-            var itemToAdd = filePath;
-            itemToAdd = itemToAdd.replace(repoDir, "");
+            if (item.slice(-1) == "/")
+            {
+                searchItem = searchItem.replace("\\", "/");
 
-            filesFound.push(itemToAdd);
+                if (searchItem.indexOf(item) === 0)
+                    return cnt;
+            }
+            else
+            {
+                if (searchItem === path.parse(item).base)
+                    return cnt;
+            }
+        }
 
-            var stats = fs.statSync(filePath);
+        return -1;
+    }
 
-            if (stats.isDirectory())
-                enumFolder(filePath, filesFound);
-        });
+    return {
+        search: function (searchItem)
+        {
+            return search(searchItem);
+        }
+    };
+}
+
+function clean()
+{
+    console.log("Cleaning build environment...");
+    console.log("Removing %s", appDir);
+
+    try
+    {
+        fs.removeSync(appDir);
+    }
+    catch (error)
+    {
+        console.log("Failed to remove %s. %s", appDir, error);
+        return false;
+    }
+
+    console.log("Build environment cleaned.");
+    return true;
 }
 
 function copyRepo()
 {
-    var itemsToCopy = [];
-    enumFolder(repoDir, itemsToCopy);
+    console.log("Copying repository to build environment...");
 
-    itemsToCopy.forEach(
-        function (item)
-        {
-            console.log(item);
-        });
-}
+    function isItemAllowed(item)
+    {
+        item = path.relative(repoDir, item);
 
-function runPackager() 
-{
+        if (item === "")
+            return true;
+
+        if (ignoreList.search(item) > -1)
+            return false;
+
+        console.log("Copying %s...", item);
+        return true;
+    }
+
     var options =
         {
-            "dir": "../Recipe Manager/",
+            "filter": isItemAllowed
+        };
+
+    try
+    {
+        fs.copySync(repoDir, appDir, options);
+    }
+    catch (error)
+    {
+        console.log("Failed to copy repository to %s. %s", appDir, error);
+        return false;
+    }
+
+    console.log("Removing empty directories...");
+    removeEmptyDirs(appDir);
+
+    console.log("Application copied to %s", appDir);
+    return true;
+}
+
+function installDepends()
+{
+    console.log("Installing npm dependencies...");
+    
+    var options = 
+    {
+        "cwd": appDir,
+        "stdio": [0, 1, 2]
+    };
+
+    child_process.execSync("npm install", options);
+}
+
+function runPackager(platform, callback) 
+{
+    var iconPath = repoDir + "icons/icon.";
+
+    switch (platform)
+    {
+        case "win32":
+        case "linux":
+            iconPath += "ico";
+            break;
+
+        case "darwin":
+            iconPath += "icns";
+            break;
+    }
+
+    var options =
+        {
+            "dir": appDir,
             "arch": "x64",
-            "platform": "win32",
+            "platform": platform,
             "app-copyright": "André Zammit",
             "app-version": "1.0.3",
-            "icon": "../Recipe Manager/icons/icon.ico",
+            "icon": iconPath,
             "name": "Recipe Manager",
-            "ignore":
-            [
-                "/.data",
-                "/.gitignore",
-                "/.jshintrc",
-                "/.vscode",
-                "/.credentials",
-                "/icons",
-                "/typings",
-                "/jsconfig.json",
-            ],
-            "out": "./releases",
+            "out": releasesDir,
             "overwrite": true,
             "prune": true,
             "version-string":
@@ -96,17 +179,37 @@ function runPackager()
             if (error !== null) 
             {
                 console.log("Packaging failed: ", error);
-                return;
+            }
+            else
+            {
+                console.log("Packaged successfully to: " + appPaths[0]);
             }
 
-            console.log("Packaged successfully to: " + appPaths[0]);
+            callback(error);
         });
 }
 
-function run()
+function run(callback)
 {
-    copyRepo();
-    //runPackager();
+    if (!clean())
+        return;
+
+    if (!copyRepo())
+        return;
+
+    installDepends();
+
+    runPackager("win32",
+        function (error)
+        {
+            clean();
+            callback();
+        }
+    );
 }
 
-run();
+run(
+    function (error)
+    {
+        process.exit();
+    });
