@@ -9,6 +9,7 @@ var removeEmptyDirs = require('remove-empty-directories');
 var appDir = "./app/";
 var releasesDir = "./releases";
 var repoDir = "../Recipe Manager/";
+var cachedDependsDir = "./cached_node_modules";
 
 var ignoreList = IgnoreList();
 
@@ -122,17 +123,84 @@ function copyRepo()
     return true;
 }
 
+function isCachedDepends()
+{
+    try 
+    {
+        var stats = fs.statSync(cachedDependsDir);
+
+        if (!stats.isDirectory())
+            return false;
+    }
+    catch (error) 
+    {
+        return false;
+    }
+
+    return true;
+}
+
+function copyCachedDepends()
+{
+    console.log("Copying cached dependencies...");
+
+    var dest = appDir + "node_modules";
+
+    var options =
+        {
+            "clobber": false
+        };
+
+    try
+    {
+        fs.copySync(cachedDependsDir, dest, options);
+    }
+    catch (error)
+    {
+        console.log("Failed to copy cached dependencies. %s", error);
+    }
+}
+
+function cacheDepends()
+{
+    console.log("Caching dependencies...");
+
+    var source = appDir + "node_modules";
+
+    var options =
+        {
+            "clobber": false
+        };
+
+    try
+    {
+        fs.copySync(source, cachedDependsDir, options);
+    }
+    catch (error)
+    {
+        console.log("Failed to cache dependencies. %s", error);
+    }
+}
+
 function installDepends()
 {
     console.log("Installing npm dependencies...");
-    
-    var options = 
-    {
-        "cwd": appDir,
-        "stdio": [0, 1, 2]
-    };
+
+    var useCachedDepends = isCachedDepends();
+
+    if (useCachedDepends)
+        copyCachedDepends();
+
+    var options =
+        {
+            "cwd": appDir,
+            "stdio": "inherit"
+        };
 
     child_process.execSync("npm install", options);
+
+    if (!useCachedDepends)
+        cacheDepends();
 }
 
 function runPackager(platform, callback) 
