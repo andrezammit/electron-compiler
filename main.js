@@ -11,6 +11,13 @@ var releasesDir = "./releases";
 var repoDir = "../Recipe Manager/";
 var cachedDependsDir = "./cached_node_modules";
 
+var uglifyList =
+    [
+        "modules/",
+        "scripts/",
+        "main.js"
+    ];
+
 var ignoreList = IgnoreList();
 
 function IgnoreList()
@@ -121,6 +128,32 @@ function copyRepo()
 
     console.log("Application copied to %s", appDir);
     return true;
+}
+
+function uglifyDir(dirPath)
+{
+
+}
+
+function uglifyFile(filePath)
+{
+    filePath = appDir + filePath;
+    var result = uglifyJS.minify(filePath);
+}
+
+function uglifyApp()
+{
+    uglifyList.forEach(
+        function (item)
+        {
+            if (item.slice(-1) == "/")
+            {
+                uglifyDir(item);
+                return;
+            }
+
+            uglifyFile(item);
+        });
 }
 
 function isCachedDepends()
@@ -264,6 +297,8 @@ function run(callback)
 
     if (!copyRepo())
         return;
+
+    uglifyApp();
 
     installDepends();
 
