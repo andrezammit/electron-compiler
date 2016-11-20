@@ -172,7 +172,7 @@ function uglifyDir(dirPath)
 
 function uglifyFile(filePath)
 {
-	console.log("Uglifying  %s...", filePath);
+	console.log("Uglifying %s...", filePath);
 
 	var options =
 		{
