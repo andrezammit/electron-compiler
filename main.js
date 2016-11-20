@@ -2,7 +2,6 @@ var path = require("path");
 var fs = require("fs-extra");
 var child_process = require('child_process');
 
-var uglifyJS = require("uglify-js");
 var packager = require("electron-packager");
 var removeEmptyDirs = require('remove-empty-directories');
 
@@ -11,10 +10,12 @@ var releasesDir = "./releases";
 var repoDir = "../Recipe Manager/";
 var cachedDependsDir = "./cached_node_modules";
 
+var babelPath = path.normalize("node_modules/.bin/babel");
+
 var uglifyList =
     [
         "modules/",
-        "scripts/",
+        "scripts/launcher.js",
         "main.js"
     ];
 
@@ -73,7 +74,10 @@ function IgnoreList()
 
 function clean()
 {
+    console.log("");
     console.log("Cleaning build environment...");
+    console.log("");
+
     console.log("Removing %s", appDir);
 
     try
@@ -92,7 +96,9 @@ function clean()
 
 function copyRepo()
 {
+    console.log("");
     console.log("Copying repository to build environment...");
+    console.log("");
 
     function isItemAllowed(item)
     {
@@ -123,37 +129,89 @@ function copyRepo()
         return false;
     }
 
+    console.log("");
     console.log("Removing empty directories...");
+
     removeEmptyDirs(appDir);
 
+    console.log("");
     console.log("Application copied to %s", appDir);
+
     return true;
 }
 
 function uglifyDir(dirPath)
 {
+    var dirItems = fs.readdirSync(dirPath);
 
+    dirItems.forEach(
+        function (item)
+        {
+            var fullPath = path.join(dirPath, item);
+            var stats = fs.statSync(fullPath);
+
+            if (stats.isDirectory())
+            {
+                uglifyDir(fullPath);
+            }
+            else
+            {
+                uglifyFile(fullPath);
+            }
+        });
 }
 
 function uglifyFile(filePath)
-{
-    filePath = appDir + filePath;
-    var result = uglifyJS.minify(filePath);
+{    
+    console.log("Uglifying  %s...", filePath);
+    
+    var options =
+        {
+            "stdio": "inherit"
+        };
+
+    var cmd = babelPath + " " + filePath + " --out-file " + filePath + " --presets babili";
+
+    try
+    {
+        child_process.execSync(cmd, options);
+    }
+    catch (error)
+    {
+        console.log("Failed to uglify %s. %s", filePath, error);
+        return false;
+    }
+
+    return true;
 }
 
 function uglifyApp()
 {
+    console.log("");
+    console.log("Uglifying source code...");
+    console.log("");
+    
+    var success = true;
+
     uglifyList.forEach(
         function (item)
         {
-            if (item.slice(-1) == "/")
+            if (!success)
+                return;
+
+            item = path.join(appDir, item);
+
+            if (item.slice(-1) == path.sep)
             {
                 uglifyDir(item);
                 return;
             }
 
-            uglifyFile(item);
+            if (!uglifyFile(item))
+                success = false;
         });
+
+    return success;
 }
 
 function isCachedDepends()
@@ -217,7 +275,9 @@ function cacheDepends()
 
 function installDepends()
 {
+    console.log("");    
     console.log("Installing npm dependencies...");
+    console.log("");
 
     var useCachedDepends = isCachedDepends();
 
@@ -230,14 +290,28 @@ function installDepends()
             "stdio": "inherit"
         };
 
-    child_process.execSync("npm install", options);
+    try
+    {
+        child_process.execSync("npm install", options);
+    }
+    catch (error)
+    {
+        console.log("Failed to install npm dependencies. %s", error);
+        return false;
+    }
 
     if (!useCachedDepends)
         cacheDepends();
+
+    return true;
 }
 
 function runPackager(platform, callback) 
 {
+    console.log("");    
+    console.log("Packaging application...");
+    console.log("");
+
     var iconPath = repoDir + "icons/icon.";
 
     switch (platform)
@@ -293,14 +367,28 @@ function runPackager(platform, callback)
 function run(callback)
 {
     if (!clean())
+    {
+        callback();
         return;
+    }
 
     if (!copyRepo())
+    {
+        callback();
         return;
+    }
 
-    uglifyApp();
+    if (!uglifyApp())
+    {
+        callback();
+        return;
+    }
 
-    installDepends();
+    if (!installDepends())
+    {
+        callback();
+        return;
+    }
 
     runPackager("win32",
         function (error)

@@ -14,9 +14,11 @@
   "license": "ISC",
   "homepage": "https://bitbucket.org/andrezammit/recipe-manager-build#readme",
   "dependencies": {
+    "babel-cli": "^6.18.0",
+    "babel-preset-babili": "0.0.8",
+    "babel-preset-latest": "^6.16.0",
     "electron-packager": "^8.3.0",
     "fs-extra": "^1.0.0",
-    "remove-empty-directories": "0.0.1",
-    "uglify-js": "^2.7.4"
+    "remove-empty-directories": "0.0.1"
   }
 }
