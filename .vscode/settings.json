@@ -1,0 +1,7 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+    "javascript.format.placeOpenBraceOnNewLineForFunctions": true,
+
+    // Defines whether an open brace is put onto a new line for control blocks or not
+    "javascript.format.placeOpenBraceOnNewLineForControlBlocks": true
+}
