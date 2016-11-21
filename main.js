@@ -13,6 +13,8 @@ var cachedDependsDir = "./cached_node_modules";
 var babelPath = path.normalize("node_modules/.bin/babel");
 var minifyPath = path.normalize("node_modules/.bin/minify");
 
+var packagePath = appDir + "package.json";
+
 var platforms = [];
 
 var validPlatforms =
@@ -332,6 +334,38 @@ function installDepends()
 	return true;
 }
 
+function updateVersion()
+{
+	try
+	{
+		var file = fs.readFileSync(packagePath);
+		var packageJSON = JSON.parse(file);
+
+		var version = packageJSON.version.split(".");
+
+		if (version.length < 3)
+		{
+			console.log("Invalid version format.");
+			return false;
+		}
+
+		var minorVersion = parseInt(version[2]);
+		version[2] = ++minorVersion;
+
+		packageJSON.version = version.join(".");
+		file = JSON.stringify(packageJSON);
+
+		fs.writeFileSync(packagePath, file);
+	}
+	catch (error)
+	{
+		console.log("Failed to update version in %s. %s", packagePath, error);
+		return false;
+	}
+
+	return true;
+}
+
 function detectPlatforms()
 {
 	console.log("");
@@ -476,6 +510,12 @@ function run(callback)
 	}
 
 	if (!installDepends())
+	{
+		callback();
+		return;
+	}
+
+	if (!updateVersion())
 	{
 		callback();
 		return;
