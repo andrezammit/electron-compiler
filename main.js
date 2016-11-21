@@ -11,6 +11,7 @@ var repoDir = "../Recipe Manager/";
 var cachedDependsDir = "./cached_node_modules";
 
 var babelPath = path.normalize("node_modules/.bin/babel");
+var minifyPath = path.normalize("node_modules/.bin/minify");
 
 var platforms = [];
 
@@ -25,6 +26,7 @@ var uglifyList =
 	[
 		"modules/",
 		"scripts/launcher.js",
+		"styles/style.css",
 		"main.js"
 	];
 
@@ -179,7 +181,22 @@ function uglifyFile(filePath)
 			"stdio": "inherit"
 		};
 
-	var cmd = babelPath + " " + filePath + " --out-file " + filePath + " --presets babili";
+	var cmd = "";
+	
+	switch (path.parse(filePath).ext)
+	{
+		case ".js":
+			cmd = babelPath + " " + filePath + " --out-file " + filePath + " --presets babili";
+			break;
+
+		case ".css":
+			cmd = minifyPath + " " + filePath + " --output " + filePath;
+			break;
+
+		default:
+			console.log("%s cannot be uglified.", filePath);
+			return false;			
+	}
 
 	try
 	{

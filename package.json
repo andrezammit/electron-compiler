@@ -19,6 +19,7 @@
     "babel-preset-latest": "^6.16.0",
     "electron-packager": "^8.3.0",
     "fs-extra": "^1.0.0",
+    "minifier": "^0.8.0",
     "remove-empty-directories": "0.0.1"
   }
 }
