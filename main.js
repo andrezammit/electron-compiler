@@ -14,7 +14,10 @@ var cachedDependsDir = "./cached_node_modules";
 var babelPath = path.normalize("node_modules/.bin/babel");
 var minifyPath = path.normalize("node_modules/.bin/minify");
 
-var packagePath = path.join(appDir, "package.json");
+var configPath = "";
+var packagePath = "";
+
+var config = {};
 
 var platforms = [];
 
@@ -25,32 +28,11 @@ var validPlatforms =
 		"darwin"
 	];
 
-var uglifyList =
-	[
-		"modules/",
-		"scripts/launcher.js",
-		"styles/style.css",
-		"main.js"
-	];
-
 var ignoreList = IgnoreList();
 
 function IgnoreList()
 {
-	var list =
-		[
-			"node_modules/",
-			".git/",
-			".data/",
-			".gitignore",
-			".jshintrc",
-			".vscode/",
-			".credentials/",
-			"icons/",
-			"typings/",
-			"typings.json",
-			"jsconfig.json",
-		];
+	var list = [];
 
 	function search(searchItem)
 	{
@@ -79,11 +61,125 @@ function IgnoreList()
 	}
 
 	return {
+		set: function (ignoreList)
+		{
+			list = ignoreList;
+		},
+
+		get: function ()
+		{
+			return list;
+		},
+
 		search: function (searchItem)
 		{
 			return search(searchItem);
 		}
 	};
+}
+
+function readEnvironment()
+{
+	if (process.argv.length < 3)
+	{
+		console.log("Applicaton path not found.");
+		return false;
+	}
+
+	repoDir = process.argv[2];
+
+	var stats = fs.statSync(repoDir);
+
+	if (!stats.isDirectory())
+	{
+		console.log("%s is not a valid directory.", repoDir);
+		return false;
+	}
+
+	packagePath = path.join(repoDir, "package.json");
+
+	stats = fs.statSync(packagePath);
+
+	if (!stats.isFile())
+	{
+		console.log("package.json was not found in %s.", repoDir);
+		return false;
+	}
+
+	try
+	{
+		packageJSON = JSON.parse(fs.readFileSync(packagePath));
+	}
+	catch (error)
+	{
+		console.log("Failed to parse package.json. %s", error);
+		return false;
+	}
+
+	configPath = path.join(repoDir, "electron_compiler.json");
+
+	try 
+	{
+		config = JSON.parse(fs.readFileSync(configPath));
+	}
+	catch (error)
+	{
+		console.log("Failed to parse electron_compiler.json.");
+		return false;
+	}
+
+	ignoreList.set(config.ignoreList);
+
+	if (!detectPlatforms())
+		return false;
+
+	dumpConfig();
+	return true;
+}
+
+function detectPlatforms()
+{
+	var success = true;
+
+	config.platforms.forEach(
+		function (item)
+		{
+			if (!success)
+				return;
+
+			if (validPlatforms.indexOf(item) === -1)
+			{
+				console.log("%s is not a valid platform.", item);
+				success = false;
+
+				return;
+			}
+
+			var platform =
+				{
+					"name": item,
+					"done": false
+				};
+
+			platforms.push(platform);
+		});
+
+	return success;
+}
+
+function dumpConfig()
+{
+	var appName = packageJSON.productName;
+
+	if (appName === undefined || appName.length === 0)
+		appName = packageJSON.name;
+
+	console.log("Application: %s", appName);
+	console.log("Current version: %s", packageJSON.version);
+	console.log("");
+	console.log("Building for: %s", config.platforms.join(", "));
+	console.log("Ignoring: %s", ignoreList.get().join(", "));
+	console.log("Uglifying: %s", config.uglifyList.join(", "));
 }
 
 function clean()
@@ -222,7 +318,7 @@ function uglifyApp()
 
 	var success = true;
 
-	uglifyList.forEach(
+	config.uglifyList.forEach(
 		function (item)
 		{
 			if (!success)
@@ -337,73 +433,19 @@ function installDepends()
 
 function updateVersion()
 {
-	try
+	var version = packageJSON.version.split(".");
+
+	if (version.length < 3)
 	{
-		var file = fs.readFileSync(packagePath);
-		var packageJSON = JSON.parse(file);
-
-		var version = packageJSON.version.split(".");
-
-		if (version.length < 3)
-		{
-			console.log("Invalid version format.");
-			return false;
-		}
-
-		var minorVersion = parseInt(version[2]);
-		version[2] = ++minorVersion;
-
-		packageJSON.version = version.join(".");
-		file = JSON.stringify(packageJSON);
-
-		fs.writeFileSync(packagePath, file);
-	}
-	catch (error)
-	{
-		console.log("Failed to update version in %s. %s", packagePath, error);
+		console.log("Invalid version format.");
 		return false;
 	}
 
+	var minorVersion = parseInt(version[2]);
+	version[2] = ++minorVersion;
+
+	packageJSON.version = version.join(".");
 	return true;
-}
-
-function detectPlatforms()
-{
-	console.log("");
-	console.log("Detecting package platforms...");
-	console.log("");
-
-	var platforms = [];
-
-	process.argv.forEach(
-		function (val, index, array)
-		{
-			if (validPlatforms.indexOf(val) === -1)
-				return;
-
-			var platform =
-				{
-					"name": val,
-					"done": false
-				};
-
-			platforms.push(platform);
-		});
-
-	return platforms;
-}
-
-function dumpDetectedPlatforms()
-{
-	var platformsString = "";
-
-	platforms.forEach(
-		function (platform)
-		{
-			platformsString += platform.name + " ";
-		});
-
-	console.log("Detected platforms: %s", platformsString);
 }
 
 function isAllPlatformsReady()
@@ -487,23 +529,11 @@ function runPackager(platform, callback)
 		});
 }
 
-function copyPackageJSON()
+function savePackageJSON()
 {
 	console.log("");
-	console.log("Copying updated package.json to repository...");
+	console.log("Updating package.json in repository...");
 	console.log("");
-
-	var packageJSON = "";
-
-	try
-	{
-		packageJSON = fs.readFileSync(packagePath);
-	}
-	catch (error)
-	{
-		console.log("Failed to read package.json. %s", error);
-		return false;
-	}
 
 	var options =
 		{
@@ -512,9 +542,9 @@ function copyPackageJSON()
 			"end_with_newline": true
 		};
 
-	packageJSON = beautify(packageJSON.toString(), options);
+	var data = beautify(packageJSON.toString(), options);
 
-	if (packageJSON.length === 0)
+	if (data.length === 0)
 	{
 		console.log("Failed to beautify package.json.");
 		return false;
@@ -522,8 +552,7 @@ function copyPackageJSON()
 
 	try
 	{
-		var dest = path.join(repoDir, "package.json");
-		fs.writeFileSync(dest, packageJSON);
+		fs.writeFileSync(packagePath, data);
 	}
 	catch (error)
 	{
@@ -531,14 +560,17 @@ function copyPackageJSON()
 		return false;
 	}
 
-	console.log("Updated package.json copied to repository.");
+	console.log("Updated package.json in repository.");
 	return true;
 }
 
 function run(callback)
 {
-	platforms = detectPlatforms();
-	dumpDetectedPlatforms();
+	if (!readEnvironment())
+	{
+		callback();
+		return;
+	}
 
 	if (!clean())
 	{
@@ -580,7 +612,7 @@ function run(callback)
 
 					if (isAllPlatformsReady())
 					{
-						copyPackageJSON();
+						savePackageJSON();
 						clean();
 
 						callback();

@@ -14,7 +14,7 @@
             "sourceMaps": true,
             "args": 
             [
-                "win32"    
+                "..\\Recipe Manager\\"    
             ]
         },
         {
