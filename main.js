@@ -3,7 +3,8 @@ var fs = require("fs-extra");
 var child_process = require('child_process');
 
 var packager = require("electron-packager");
-var removeEmptyDirs = require('remove-empty-directories');
+var beautify = require('js-beautify').js_beautify;
+var removeEmptyDirs = require("remove-empty-directories");
 
 var appDir = "./app/";
 var releasesDir = "./releases";
@@ -13,7 +14,7 @@ var cachedDependsDir = "./cached_node_modules";
 var babelPath = path.normalize("node_modules/.bin/babel");
 var minifyPath = path.normalize("node_modules/.bin/minify");
 
-var packagePath = appDir + "package.json";
+var packagePath = path.join(appDir, "package.json");
 
 var platforms = [];
 
@@ -184,7 +185,7 @@ function uglifyFile(filePath)
 		};
 
 	var cmd = "";
-	
+
 	switch (path.parse(filePath).ext)
 	{
 		case ".js":
@@ -197,7 +198,7 @@ function uglifyFile(filePath)
 
 		default:
 			console.log("%s cannot be uglified.", filePath);
-			return false;			
+			return false;
 	}
 
 	try
@@ -486,6 +487,54 @@ function runPackager(platform, callback)
 		});
 }
 
+function copyPackageJSON()
+{
+	console.log("");
+	console.log("Copying updated package.json to repository...");
+	console.log("");
+
+	var packageJSON = "";
+
+	try
+	{
+		packageJSON = fs.readFileSync(packagePath);
+	}
+	catch (error)
+	{
+		console.log("Failed to read package.json. %s", error);
+		return false;
+	}
+
+	var options =
+		{
+			"indent_with_tabs": true,
+			"brace_style": "expand",
+			"end_with_newline": true
+		};
+
+	packageJSON = beautify(packageJSON.toString(), options);
+
+	if (packageJSON.length === 0)
+	{
+		console.log("Failed to beautify package.json.");
+		return false;
+	}
+
+	try
+	{
+		var dest = path.join(repoDir, "package.json");
+		fs.writeFileSync(dest, packageJSON);
+	}
+	catch (error)
+	{
+		console.log("Failed to copy package.json to repository. %s", error);
+		return false;
+	}
+
+	console.log("Updated package.json copied to repository.");
+	return true;
+}
+
 function run(callback)
 {
 	platforms = detectPlatforms();
@@ -531,7 +580,9 @@ function run(callback)
 
 					if (isAllPlatformsReady())
 					{
+						copyPackageJSON();
 						clean();
+
 						callback();
 					}
 				}
