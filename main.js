@@ -18,6 +18,7 @@ var configPath = "";
 var packagePath = "";
 
 var config = {};
+var packageJSON = {};
 
 var platforms = [];
 
@@ -542,7 +543,7 @@ function savePackageJSON()
 			"end_with_newline": true
 		};
 
-	var data = beautify(packageJSON.toString(), options);
+	var data = beautify(JSON.stringify(packageJSON), options);
 
 	if (data.length === 0)
 	{
