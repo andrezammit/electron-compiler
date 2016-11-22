@@ -14,9 +14,7 @@
             "sourceMaps": true,
             "args": 
             [
-                "win32",
-                "linux",
-                "darwin"    
+                "win32"    
             ]
         },
         {
