@@ -1,0 +1,4 @@
+.vscode
+cached_node_modules
+releases
+.npmignore
