@@ -131,6 +131,11 @@ function readEnvironment()
 
 	ignoreList.set(config.ignoreList);
 
+	config.appName = packageJSON.productName;
+
+	if (config.appName === undefined || config.appName.length === 0)
+		config.appName = packageJSON.name;
+
 	if (!detectPlatforms())
 		return false;
 
@@ -170,12 +175,7 @@ function detectPlatforms()
 
 function dumpConfig()
 {
-	var appName = packageJSON.productName;
-
-	if (appName === undefined || appName.length === 0)
-		appName = packageJSON.name;
-
-	console.log("Application: %s", appName);
+	console.log("Application: %s", config.appName);
 	console.log("Current version: %s", packageJSON.version);
 	console.log("");
 	console.log("Building for: %s", config.platforms.join(", "));
@@ -474,7 +474,7 @@ function runPackager(platform, callback)
 	console.log("Packaging application for %s...", platform);
 	console.log("");
 
-	var iconPath = repoDir + "icons/icon.";
+	var iconPath = path.join(repoDir, "icons/icon.");
 
 	switch (platform)
 	{
@@ -493,21 +493,14 @@ function runPackager(platform, callback)
 			"dir": appDir,
 			"arch": "x64",
 			"platform": platform,
-			"app-copyright": "André Zammit",
-			"app-version": "1.0.3",
+			"app-copyright": config.versionString.CompanyName,
+			"app-version": packageJSON.version,
 			"icon": iconPath,
-			"name": "Recipe Manager",
+			"name": config.appName,
 			"out": releasesDir,
 			"overwrite": true,
 			"prune": true,
-			"version-string":
-			{
-				"CompanyName": "André Zammit",
-				"FileDescription": "Recipe Manager application.",
-				"OriginalFilename": "Recipe Manager.exe",
-				"ProductName": "Recipe Manager",
-				"InternalName": "Recipe Manager"
-			}
+			"version-string": config.versionString
 		};
 
 	packager(options,
