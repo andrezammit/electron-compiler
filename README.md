@@ -3,13 +3,6 @@
 
 Copy, uglify, minify and package [Electron](http://electron.atom.io) projects.
 
-- [How it works](#how-it-works)
-- [Installation](#installation)
-- [Usage](#basic-usage)
-- [Options](#options)
-- [Output](#output)
-- [Third Party Libraries](#third-party-libraries)
-
 ## How It Works
 ---
 
