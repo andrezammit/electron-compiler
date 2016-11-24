@@ -25,11 +25,11 @@ Copy, uglify, minify and package [Electron](http://electron.atom.io) projects.
 ## Options
 ---
 
-Compiler options are read from a electron_compiler.json file in the application's repository.
+Compiler options are read from an electron_compiler.json file in the application's repository.
 
     {
         "platforms": [],    // Array or platforms to compile for. Supported options: win32, linux, darwin 
-        "uglifyList": [],   // Array of paths to uglify. JavascScript and CSS files are supported.
+        "uglifyList": [],   // Array of paths to uglify. JavaScript and CSS files are supported.
         "ignoreList": [],   // Array of files to ignore. 
         "versionString":    // Object containing electron packager settings for Windows build.
         {
