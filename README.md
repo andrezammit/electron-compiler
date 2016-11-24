@@ -1,5 +1,5 @@
-# Electron-Compiler #
-===
+# electron-compiler #
+---
 
 Copy, uglify, minify and package [Electron](http://electron.atom.io) projects.
 
@@ -14,8 +14,8 @@ Copy, uglify, minify and package [Electron](http://electron.atom.io) projects.
 ---
 
 1. Copies application repository to a temporary location.
-2. Uglifies JavascScript and CSS files.
-3. Installs npm dependencies in temporary location.
+2. Uglifies JavaScript and CSS files.
+3. Installs npm dependencies in a temporary location.
 4. Updates build version in package.json.
 5. Packages the application using [electron-packager](https://github.com/electron-userland/electron-packager).
 
@@ -40,11 +40,11 @@ Compiler options are read from a electron_compiler.json file in the application'
         "ignoreList": [],   // Array of files to ignore. 
         "versionString":    // Object containing electron packager settings for Windows build.
         {
-            "CompanyName": "André Zammit",
-            "FileDescription": "Recipe Manager application.",
-            "OriginalFilename": "Recipe Manager.exe",
-            "ProductName": "Recipe Manager",
-            "InternalName": "Recipe Manager"
+            "CompanyName": "Company",
+            "FileDescription": "Application description.",
+            "OriginalFilename": "Filename.exe",
+            "ProductName": "Product",
+            "InternalName": "Internal Name"
         }
     }
 
@@ -56,9 +56,9 @@ The compiler output of each platform from electron-packager is saved to .\releas
 ## Third Party Libraries
 ---
 
-Packaging - [electron-packager](https://github.com/electron-userland/electron-packager)
-File system - [fs-extra](https://github.com/jprichardson/node-fs-extra)
-JSON beautifying - [js-beautify](https://github.com/beautify-web/js-beautify)
-JavasScript uglifying - [babel](https://babeljs.io/)
-CSS minifaction - [minifier](https://github.com/fizker/minifier)
-Removing empty directories - [remove-empty-directories](https://github.com/danielhusar/remove-empty-directories)
+* Packaging - [electron-packager](https://github.com/electron-userland/electron-packager)
+* File system - [fs-extra](https://github.com/jprichardson/node-fs-extra)
+* JSON beautifying - [js-beautify](https://github.com/beautify-web/js-beautify)
+* JavasScript uglifying - [babel](https://babeljs.io/)
+* CSS minifaction - [minifier](https://github.com/fizker/minifier)
+* Removing empty directories - [remove-empty-directories](https://github.com/danielhusar/remove-empty-directories)
