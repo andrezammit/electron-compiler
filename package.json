@@ -1,6 +1,6 @@
-{
+﻿{
   "name": "electron-compiler",
-  "version": "1.0.2",
+  "version": "1.0.5",
   "description": "Compiler for electron projects.",
   "main": "main.js",
   "repository": {
@@ -10,6 +10,12 @@
   "author": "André Zammit",
   "license": "ISC",
   "homepage": "https://bitbucket.org/andrezammit/electron-compiler#readme",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "bin": {
+    "electron-compiler": "main.js"
+  },
   "dependencies": {
     "babel-cli": "^6.18.0",
     "babel-preset-babili": "0.0.8",
