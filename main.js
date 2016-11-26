@@ -66,6 +66,9 @@ function IgnoreList()
 	return {
 		set: function (ignoreList)
 		{
+			if (ignoreList === undefined)
+				return;
+				
 			list = ignoreList;
 		},
 
@@ -168,6 +171,9 @@ function readEnvironment()
 				"InternalName": ""
 			};
 	}
+
+	if (config.uglifyList === undefined)
+		config.uglifyList = [];
 
 	if (!detectPlatforms())
 		return false;
