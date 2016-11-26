@@ -173,6 +173,9 @@ function readEnvironment()
 		return false;
 
 	dumpConfig();
+	console.log("");
+	testPaths();
+
 	return true;
 }
 
@@ -214,6 +217,39 @@ function dumpConfig()
 	console.log("Building for: %s", config.platforms.join(", "));
 	console.log("Ignoring: %s", ignoreList.get().join(", "));
 	console.log("Uglifying: %s", config.uglifyList.join(", "));
+}
+
+function testPaths()
+{
+	config.uglifyList.forEach(
+		function (item)
+		{
+			item = path.join(repoDir, item);
+
+			try
+			{
+				fs.statSync(item);
+			}
+			catch (error)
+			{
+				console.log("Invalid path in uglify list: %s. %s", item, error);
+			}
+		});
+
+	ignoreList.get().forEach(
+		function (item)
+		{
+			item = path.join(repoDir, item);
+
+			try
+			{
+				fs.statSync(item);
+			}
+			catch (error)
+			{
+				console.log("Invalid path in ignore list: %s. %s", item, error);
+			}
+		});
 }
 
 function clean()
