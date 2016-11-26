@@ -68,7 +68,7 @@ function IgnoreList()
 		{
 			if (ignoreList === undefined)
 				return;
-				
+
 			list = ignoreList;
 		},
 
@@ -221,8 +221,12 @@ function dumpConfig()
 	console.log("Current version: %s", packageJSON.version);
 	console.log("");
 	console.log("Building for: %s", config.platforms.join(", "));
-	console.log("Ignoring: %s", ignoreList.get().join(", "));
-	console.log("Uglifying: %s", config.uglifyList.join(", "));
+
+	if (ignoreList.get().length > 0)
+		console.log("Ignoring: %s", ignoreList.get().join(", "));
+
+	if (config.uglifyList.length > 0)
+		console.log("Uglifying: %s", config.uglifyList.join(", "));
 }
 
 function testPaths()
