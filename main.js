@@ -187,6 +187,12 @@ function readEnvironment()
 
 function detectPlatforms()
 {
+	if (config.platforms === undefined || config.platforms.length === 0)
+	{
+		console.log("Specify at least one platform to build for.");
+		return false;
+	}
+
 	var success = true;
 
 	config.platforms.forEach(
