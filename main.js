@@ -10,12 +10,12 @@ var removeEmptyDirs = require("remove-empty-directories");
 
 var appDir = "./app/";
 var releasesDir = "./releases";
-var repoDir = "../Recipe Manager/";
 var cachedDependsDir = "./cached_node_modules";
 
 var babelPath = path.normalize("node_modules/.bin/babel");
 var minifyPath = path.normalize("node_modules/.bin/minify");
 
+var repoDir = "";
 var configPath = "";
 var packagePath = "";
 
@@ -89,21 +89,40 @@ function readEnvironment()
 		return false;
 	}
 
-	repoDir = process.argv[2];
+	repoDir = process.argv[2].replace("\"", "");
 
-	var stats = fs.statSync(repoDir);
+	var stats = null;
 
-	if (!stats.isDirectory())
+	try
 	{
-		console.log("%s is not a valid directory.", repoDir);
+		stats = fs.statSync(repoDir);
+
+		if (!stats.isDirectory())
+		{
+			console.log("%s is not a valid directory.", repoDir);
+			return false;
+		}
+
+	}
+	catch (error)
+	{
+		console.log("%s is not a valid directory. %s", repoDir, error);
 		return false;
 	}
 
 	packagePath = path.join(repoDir, "package.json");
+	
+	try
+	{
+		stats = fs.statSync(packagePath);
 
-	stats = fs.statSync(packagePath);
-
-	if (!stats.isFile())
+		if (!stats.isFile())
+		{
+			console.log("package.json was not found in %s.", repoDir);
+			return false;
+		}
+	}
+	catch (error)
 	{
 		console.log("package.json was not found in %s.", repoDir);
 		return false;
