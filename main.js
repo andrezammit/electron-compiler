@@ -111,7 +111,7 @@ function readEnvironment()
 	}
 
 	packagePath = path.join(repoDir, "package.json");
-	
+
 	try
 	{
 		stats = fs.statSync(packagePath);
@@ -156,6 +156,18 @@ function readEnvironment()
 
 	if (config.appName === undefined || config.appName.length === 0)
 		config.appName = packageJSON.name;
+
+	if (config.versionString === undefined)
+	{
+		config.versionString =
+			{
+				"CompanyName": "",
+				"FileDescription": "",
+				"OriginalFilename": "",
+				"ProductName": "",
+				"InternalName": ""
+			};
+	}
 
 	if (!detectPlatforms())
 		return false;
@@ -274,23 +286,30 @@ function copyRepo()
 
 function uglifyDir(dirPath)
 {
-	var dirItems = fs.readdirSync(dirPath);
+	try
+	{
+		var dirItems = fs.readdirSync(dirPath);
 
-	dirItems.forEach(
-		function (item)
-		{
-			var fullPath = path.join(dirPath, item);
-			var stats = fs.statSync(fullPath);
+		dirItems.forEach(
+			function (item)
+			{
+				var fullPath = path.join(dirPath, item);
+				var stats = fs.statSync(fullPath);
 
-			if (stats.isDirectory())
-			{
-				uglifyDir(fullPath);
-			}
-			else
-			{
-				uglifyFile(fullPath);
-			}
-		});
+				if (stats.isDirectory())
+				{
+					uglifyDir(fullPath);
+				}
+				else
+				{
+					uglifyFile(fullPath);
+				}
+			});
+	}
+	catch (error)
+	{
+		console.log("Failed to read directory %s. %s", dirPath, error);
+	}
 }
 
 function uglifyFile(filePath)
