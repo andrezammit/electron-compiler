@@ -5,11 +5,11 @@
   "main": "main.js",
   "repository": {
     "type": "git",
-    "url": "git+https://andrezammit@bitbucket.org/andrezammit/electron-compiler.git"
+    "url": "git+https://github.com/andrezammit/electron-compiler.git"
   },
   "author": "André Zammit",
   "license": "ISC",
-  "homepage": "https://bitbucket.org/andrezammit/electron-compiler#readme",
+  "homepage": "https://andrezammit.github.io/electron-compiler/",
   "scripts": {
     "start": "node main.js"
   },
