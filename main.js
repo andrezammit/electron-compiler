@@ -2,6 +2,7 @@
 
 var path = require("path");
 var fs = require("fs-extra");
+var prompt = require("prompt");
 var child_process = require('child_process');
 
 var packager = require("electron-packager");
@@ -175,6 +176,9 @@ function readEnvironment()
 	if (config.uglifyList === undefined)
 		config.uglifyList = [];
 
+	if (config.verifyConfig === undefined)
+		config.verifyConfig = true;
+
 	if (!detectPlatforms())
 		return false;
 
@@ -265,6 +269,45 @@ function testPaths()
 			{
 				console.error("Invalid path in ignore list: %s. %s", item, error);
 			}
+		});
+}
+
+function verifyConfig(callback)
+{
+	if (!config.verifyConfig)
+	{
+		callback(true);
+		return;
+	}
+
+	console.log("");
+	
+	var schema =
+		{
+			"properties":
+			{
+				"startBuild":
+				{
+					"description": "Start build?",
+					"type": "string",
+					"default": "y",
+					"required": true
+				}
+			}
+		};
+
+	prompt.get(schema,
+		function (err, result)
+		{
+			console.log(result.startBuild);
+
+			if (result.startBuild === "y")
+			{
+				callback(true);
+				return;
+			}
+
+			callback(false);
 		});
 }
 
@@ -652,12 +695,26 @@ function savePackageJSON()
 
 function run(callback)
 {
+	prompt.start();
+
 	if (!readEnvironment())
 	{
 		callback();
 		return;
 	}
 
+	verifyConfig(
+		function (startBuild)
+		{
+			if (!startBuild)
+				return;
+
+			build(callback);
+		});
+}
+
+function build()
+{
 	if (!clean())
 	{
 		callback();
