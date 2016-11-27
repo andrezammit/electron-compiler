@@ -52,6 +52,6 @@ The compiler output of each platform from electron-packager is saved to .\releas
 * Packaging - [electron-packager](https://github.com/electron-userland/electron-packager)
 * File system - [fs-extra](https://github.com/jprichardson/node-fs-extra)
 * JSON beautifying - [js-beautify](https://github.com/beautify-web/js-beautify)
-* JavasScript uglifying - [babel](https://babeljs.io/)
+* JavaScript uglifying - [babel](https://babeljs.io/)
 * CSS minifaction - [minifier](https://github.com/fizker/minifier)
 * Removing empty directories - [remove-empty-directories](https://github.com/danielhusar/remove-empty-directories)
