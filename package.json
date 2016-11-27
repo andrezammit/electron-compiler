@@ -1,6 +1,6 @@
 {
   "name": "electron-compiler",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Compiler for electron projects.",
   "main": "main.js",
   "repository": {
