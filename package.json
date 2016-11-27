@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git+https://github.com/andrezammit/electron-compiler.git"
   },
+  "bugs": {
+    "url": "https://github.com/andrezammit/electron-compiler/issues"
+  },
   "author": "André Zammit",
   "license": "ISC",
   "homepage": "https://andrezammit.github.io/electron-compiler/",
@@ -25,5 +28,15 @@
     "js-beautify": "^1.6.4",
     "minifier": "^0.8.0",
     "remove-empty-directories": "0.0.1"
-  }
+  },
+  "keywords": [
+    "electron",
+    "compiler",
+    "electron-compiler",
+    "compile",
+    "uglify",
+    "minify",
+    "packager",
+    "electron-packager"
+  ]
 }
