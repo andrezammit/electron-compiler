@@ -1,7 +1,7 @@
 {
   "name": "electron-compiler",
   "version": "1.0.8",
-  "description": "Compiler for electron projects.",
+  "description": "Compiler for Electron projects.",
   "main": "main.js",
   "repository": {
     "type": "git",
