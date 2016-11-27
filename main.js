@@ -248,7 +248,7 @@ function testPaths()
 			}
 			catch (error)
 			{
-				console.log("Invalid path in uglify list: %s. %s", item, error);
+				console.error("Invalid path in uglify list: %s. %s", item, error);
 			}
 		});
 
@@ -263,7 +263,7 @@ function testPaths()
 			}
 			catch (error)
 			{
-				console.log("Invalid path in ignore list: %s. %s", item, error);
+				console.error("Invalid path in ignore list: %s. %s", item, error);
 			}
 		});
 }
@@ -282,7 +282,7 @@ function clean()
 	}
 	catch (error)
 	{
-		console.log("Failed to remove %s. %s", appDir, error);
+		console.error("Failed to remove %s. %s", appDir, error);
 		return false;
 	}
 
@@ -321,7 +321,7 @@ function copyRepo()
 	}
 	catch (error)
 	{
-		console.log("Failed to copy repository to %s. %s", appDir, error);
+		console.error("Failed to copy repository to %s. %s", appDir, error);
 		return false;
 	}
 
@@ -386,7 +386,7 @@ function uglifyFile(filePath)
 			break;
 
 		default:
-			console.log("%s cannot be uglified.", filePath);
+			console.error("%s cannot be uglified.", filePath);
 			return false;
 	}
 
@@ -396,7 +396,7 @@ function uglifyFile(filePath)
 	}
 	catch (error)
 	{
-		console.log("Failed to uglify %s. %s", filePath, error);
+		console.error("Failed to uglify %s. %s", filePath, error);
 		return false;
 	}
 
@@ -466,7 +466,7 @@ function copyCachedDepends()
 	}
 	catch (error)
 	{
-		console.log("Failed to copy cached dependencies. %s", error);
+		console.error("Failed to copy cached dependencies. %s", error);
 	}
 }
 
@@ -487,7 +487,7 @@ function cacheDepends()
 	}
 	catch (error)
 	{
-		console.log("Failed to cache dependencies. %s", error);
+		console.error("Failed to cache dependencies. %s", error);
 	}
 }
 
@@ -514,7 +514,7 @@ function installDepends()
 	}
 	catch (error)
 	{
-		console.log("Failed to install npm dependencies. %s", error);
+		console.error("Failed to install npm dependencies. %s", error);
 		return false;
 	}
 
@@ -530,7 +530,7 @@ function updateVersion()
 
 	if (version.length < 3)
 	{
-		console.log("Invalid version format.");
+		console.error("Invalid version format.");
 		return false;
 	}
 
@@ -600,11 +600,11 @@ function runPackager(platform, callback)
 		{
 			if (error !== null)
 			{
-				console.log("Packaging failed for %s. %s", platform, error);
+				console.error("Packaging failed for %s. %s", platform, error);
 			}
 			else if (appPaths.length === 0)
 			{
-				console.log("Packaging failed for %s", platform);
+				console.error("Packaging failed for %s", platform);
 			}
 			else
 			{
@@ -632,7 +632,7 @@ function savePackageJSON()
 
 	if (data.length === 0)
 	{
-		console.log("Failed to beautify package.json.");
+		console.error("Failed to beautify package.json.");
 		return false;
 	}
 
@@ -642,7 +642,7 @@ function savePackageJSON()
 	}
 	catch (error)
 	{
-		console.log("Failed to copy package.json to repository. %s", error);
+		console.error("Failed to copy package.json to repository. %s", error);
 		return false;
 	}
 
