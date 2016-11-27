@@ -28,7 +28,8 @@
     "js-beautify": "^1.6.4",
     "minifier": "^0.8.0",
     "prompt": "^1.0.0",
-    "remove-empty-directories": "0.0.1"
+    "remove-empty-directories": "0.0.1",
+    "zip-folder": "^1.0.0"
   },
   "keywords": [
     "electron",

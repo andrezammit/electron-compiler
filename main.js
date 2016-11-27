@@ -5,6 +5,7 @@ var fs = require("fs-extra");
 var prompt = require("prompt");
 var child_process = require('child_process');
 
+var zipFolder = require('zip-folder');
 var packager = require("electron-packager");
 var beautify = require('js-beautify').js_beautify;
 var removeEmptyDirs = require("remove-empty-directories");
@@ -178,6 +179,9 @@ function readEnvironment()
 
 	if (config.verifyConfig === undefined)
 		config.verifyConfig = true;
+	
+	if (config.archiveOutput === undefined)
+		config.archiveOutput = true;
 
 	if (!detectPlatforms())
 		return false;
@@ -281,7 +285,7 @@ function verifyConfig(callback)
 	}
 
 	console.log("");
-	
+
 	var schema =
 		{
 			"properties":
@@ -603,6 +607,39 @@ function isAllPlatformsReady()
 	return allReady;
 }
 
+function archiveOutput(platform, outputPath, callback)
+{
+	if (!config.archiveOutput ||
+		platform === "darwin")
+	{
+		callback(null);
+		return;
+	}
+
+	console.log("");
+	console.log("Archiving %s output...", platform);
+
+	var archivePath = outputPath + ".zip";
+
+	zipFolder(outputPath, archivePath,
+		function (error)
+		{
+			if (error)
+			{
+				console.error("Failed to archive output for %s. %s", platform);
+			}
+			else
+			{
+				console.log("Archived %s output at %s.", platform, archivePath);
+
+				console.log("Removing %s output directory...", platform);
+				fs.removeSync(outputPath);
+			}
+
+			callback(error);
+		});
+}
+
 function runPackager(platform, callback)
 {
 	console.log("");
@@ -644,17 +681,23 @@ function runPackager(platform, callback)
 			if (error !== null)
 			{
 				console.error("Packaging failed for %s. %s", platform, error);
+
+				callback(error);
+				return;
 			}
 			else if (appPaths.length === 0)
 			{
 				console.error("Packaging failed for %s", platform);
+
+				callback(error);
+				return;
 			}
 			else
 			{
 				console.log("Packaged %s successfully to %s.", platform, appPaths[0]);
 			}
 
-			callback(error);
+			archiveOutput(platform, appPaths[0], callback);
 		});
 }
 
@@ -713,7 +756,7 @@ function run(callback)
 		});
 }
 
-function build()
+function build(callback)
 {
 	if (!clean())
 	{
