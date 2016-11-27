@@ -23,7 +23,8 @@ Copy, uglify, minify and package [Electron](http://electron.atom.io) projects.
 Compiler options are read from an electron_compiler.json file in the application's repository.
 
     {
-        "verifyConfig": true | false    // Whether to verify configuration before starting build. (Default: true)
+        "verifyConfig": true | false,   // Whether to verify configuration before starting build. (Default: true)
+        "archiveOutput" true | false,   // Whether to archive electron packager output for Windows and Linux. (Default: true)
         "platforms": [],                // Array or platforms to compile for. Supported options: win32, linux, darwin 
         "uglifyList": [],               // Array of paths to uglify. JavaScript and CSS files are supported.
         "ignoreList": [],               // Array of files to ignore. 
@@ -50,3 +51,4 @@ The compiler output of each platform from electron-packager is saved to .\releas
 * CSS minifaction - [minifier](https://github.com/fizker/minifier)
 * Removing empty directories - [remove-empty-directories](https://github.com/danielhusar/remove-empty-directories)
 * User prompts - [prompt](https://github.com/flatiron/prompt)
+* Archiving - [zip-folder](https://github.com/sole/node-zip-folder)
