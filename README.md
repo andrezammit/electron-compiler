@@ -52,3 +52,5 @@ The compiler output of each platform from electron-packager is saved to .\releas
 * Removing empty directories - [remove-empty-directories](https://github.com/danielhusar/remove-empty-directories)
 * User prompts - [prompt](https://github.com/flatiron/prompt)
 * Archiving - [zip-folder](https://github.com/sole/node-zip-folder)
+* Log colours - [colors](https://github.com/Marak/colors.js)
+* Package info - [pkginfo](https://github.com/indexzero/node-pkginfo)
