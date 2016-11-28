@@ -23,10 +23,12 @@
     "babel-cli": "^6.18.0",
     "babel-preset-babili": "0.0.8",
     "babel-preset-latest": "^6.16.0",
+    "colors": "^1.1.2",
     "electron-packager": "^8.3.0",
     "fs-extra": "^1.0.0",
     "js-beautify": "^1.6.4",
     "minifier": "^0.8.0",
+    "pkginfo": "^0.4.0",
     "prompt": "^1.0.0",
     "remove-empty-directories": "0.0.1",
     "zip-folder": "^1.0.0"

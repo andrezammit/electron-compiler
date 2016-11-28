@@ -2,12 +2,15 @@
 
 var path = require("path");
 var fs = require("fs-extra");
+var util = require("util");
 var prompt = require("prompt");
-var child_process = require('child_process');
+var child_process = require("child_process");
 
-var zipFolder = require('zip-folder');
+var colors = require("colors");
+var zipFolder = require("zip-folder");
+var pkgInfo = require('pkginfo')(module);
 var packager = require("electron-packager");
-var beautify = require('js-beautify').js_beautify;
+var beautify = require("js-beautify").js_beautify;
 var removeEmptyDirs = require("remove-empty-directories");
 
 var appDir = "./app/";
@@ -86,11 +89,38 @@ function IgnoreList()
 	};
 }
 
+function logTitle()
+{
+	if (arguments.length === 0)
+		return;
+
+	console.log("");
+	console.log(util.format.apply(util, arguments));
+	console.log("");
+}
+
+function logError()
+{
+	if (arguments.length === 0)
+		return;
+
+	arguments[0] = colors.red(arguments[0]);
+	console.log(util.format.apply(util, arguments));
+}
+
+function displayWelcome()
+{
+	console.log("");
+	console.log("electron-compiler %s", module.exports.version);
+	console.log("-----------------------");
+	console.log("");
+}
+
 function readEnvironment()
 {
 	if (process.argv.length < 3)
 	{
-		console.log("Applicaton path not found.");
+		logError("Applicaton path not found.");
 		return false;
 	}
 
@@ -104,14 +134,14 @@ function readEnvironment()
 
 		if (!stats.isDirectory())
 		{
-			console.log("%s is not a valid directory.", repoDir);
+			logError("%s is not a valid directory.", repoDir);
 			return false;
 		}
 
 	}
 	catch (error)
 	{
-		console.log("%s is not a valid directory. %s", repoDir, error);
+		logError("%s is not a valid directory. %s", repoDir, error);
 		return false;
 	}
 
@@ -123,13 +153,13 @@ function readEnvironment()
 
 		if (!stats.isFile())
 		{
-			console.log("package.json was not found in %s.", repoDir);
+			logError("package.json was not found in %s.", repoDir);
 			return false;
 		}
 	}
 	catch (error)
 	{
-		console.log("package.json was not found in %s.", repoDir);
+		logError("package.json was not found in %s.", repoDir);
 		return false;
 	}
 
@@ -139,7 +169,7 @@ function readEnvironment()
 	}
 	catch (error)
 	{
-		console.log("Failed to parse package.json. %s", error);
+		logError("Failed to parse package.json. %s", error);
 		return false;
 	}
 
@@ -151,7 +181,7 @@ function readEnvironment()
 	}
 	catch (error)
 	{
-		console.log("Failed to parse electron_compiler.json.");
+		logError("Failed to parse electron_compiler.json.");
 		return false;
 	}
 
@@ -256,7 +286,7 @@ function testPaths()
 			}
 			catch (error)
 			{
-				console.error("Invalid path in uglify list: %s. %s", item, error);
+				logError("Invalid path in uglify list: %s. %s", item, error);
 			}
 		});
 
@@ -271,7 +301,7 @@ function testPaths()
 			}
 			catch (error)
 			{
-				console.error("Invalid path in ignore list: %s. %s", item, error);
+				logError("Invalid path in ignore list: %s. %s", item, error);
 			}
 		});
 }
@@ -317,9 +347,7 @@ function verifyConfig(callback)
 
 function clean()
 {
-	console.log("");
-	console.log("Cleaning build environment...");
-	console.log("");
+	logTitle("Cleaning build environment...");
 
 	console.log("Removing %s", appDir);
 
@@ -329,7 +357,7 @@ function clean()
 	}
 	catch (error)
 	{
-		console.error("Failed to remove %s. %s", appDir, error);
+		logError("Failed to remove %s. %s", appDir, error);
 		return false;
 	}
 
@@ -339,9 +367,7 @@ function clean()
 
 function copyRepo()
 {
-	console.log("");
-	console.log("Copying repository to build environment...");
-	console.log("");
+	logTitle("Copying repository to build environment...");
 
 	function isItemAllowed(item)
 	{
@@ -368,7 +394,7 @@ function copyRepo()
 	}
 	catch (error)
 	{
-		console.error("Failed to copy repository to %s. %s", appDir, error);
+		logError("Failed to copy repository to %s. %s", appDir, error);
 		return false;
 	}
 
@@ -433,7 +459,7 @@ function uglifyFile(filePath)
 			break;
 
 		default:
-			console.error("%s cannot be uglified.", filePath);
+			logError("%s cannot be uglified.", filePath);
 			return false;
 	}
 
@@ -443,7 +469,7 @@ function uglifyFile(filePath)
 	}
 	catch (error)
 	{
-		console.error("Failed to uglify %s. %s", filePath, error);
+		logError("Failed to uglify %s. %s", filePath, error);
 		return false;
 	}
 
@@ -452,9 +478,7 @@ function uglifyFile(filePath)
 
 function uglifyApp()
 {
-	console.log("");
-	console.log("Uglifying source code...");
-	console.log("");
+	logTitle("Uglifying source code...");
 
 	var success = true;
 
@@ -513,7 +537,7 @@ function copyCachedDepends()
 	}
 	catch (error)
 	{
-		console.error("Failed to copy cached dependencies. %s", error);
+		logError("Failed to copy cached dependencies. %s", error);
 	}
 }
 
@@ -534,15 +558,13 @@ function cacheDepends()
 	}
 	catch (error)
 	{
-		console.error("Failed to cache dependencies. %s", error);
+		logError("Failed to cache dependencies. %s", error);
 	}
 }
 
 function installDepends()
 {
-	console.log("");
-	console.log("Installing npm dependencies...");
-	console.log("");
+	logTitle("Installing npm dependencies...");
 
 	var useCachedDepends = isCachedDepends();
 
@@ -561,7 +583,7 @@ function installDepends()
 	}
 	catch (error)
 	{
-		console.error("Failed to install npm dependencies. %s", error);
+		logError("Failed to install npm dependencies. %s", error);
 		return false;
 	}
 
@@ -577,7 +599,7 @@ function updateVersion()
 
 	if (version.length < 3)
 	{
-		console.error("Invalid version format.");
+		logError("Invalid version format.");
 		return false;
 	}
 
@@ -626,7 +648,7 @@ function archiveOutput(platform, outputPath, callback)
 		{
 			if (error)
 			{
-				console.error("Failed to archive output for %s. %s", platform);
+				logError("Failed to archive output for %s. %s", platform);
 			}
 			else
 			{
@@ -642,9 +664,7 @@ function archiveOutput(platform, outputPath, callback)
 
 function runPackager(platform, callback)
 {
-	console.log("");
-	console.log("Packaging application for %s...", platform);
-	console.log("");
+	logTitle("Packaging application for %s...", platform);
 
 	var iconPath = path.join(repoDir, "icons/icon.");
 
@@ -680,14 +700,14 @@ function runPackager(platform, callback)
 		{
 			if (error !== null)
 			{
-				console.error("Packaging failed for %s. %s", platform, error);
+				logError("Packaging failed for %s. %s", platform, error);
 
 				callback(error);
 				return;
 			}
 			else if (appPaths.length === 0)
 			{
-				console.error("Packaging failed for %s", platform);
+				logError("Packaging failed for %s", platform);
 
 				callback(error);
 				return;
@@ -703,9 +723,7 @@ function runPackager(platform, callback)
 
 function savePackageJSON()
 {
-	console.log("");
-	console.log("Updating package.json in repository...");
-	console.log("");
+	logTitle("Updating package.json in repository...");
 
 	var options =
 		{
@@ -718,7 +736,7 @@ function savePackageJSON()
 
 	if (data.length === 0)
 	{
-		console.error("Failed to beautify package.json.");
+		logError("Failed to beautify package.json.");
 		return false;
 	}
 
@@ -728,7 +746,7 @@ function savePackageJSON()
 	}
 	catch (error)
 	{
-		console.error("Failed to copy package.json to repository. %s", error);
+		logError("Failed to copy package.json to repository. %s", error);
 		return false;
 	}
 
@@ -739,6 +757,8 @@ function savePackageJSON()
 function run(callback)
 {
 	prompt.start();
+
+	displayWelcome();
 
 	if (!readEnvironment())
 	{
