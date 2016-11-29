@@ -41,6 +41,8 @@
     "uglify",
     "minify",
     "packager",
-    "electron-packager"
+    "electron-packager",
+    "obfuscator",
+    "node"
   ]
 }
